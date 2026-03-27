@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../lib/prisma';
-import { signJWT } from '../../../../lib/auth';
+import { prisma } from '../../../lib/prisma';
+import { signJWT } from '../../../lib/auth';
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
