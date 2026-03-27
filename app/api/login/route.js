@@ -2,7 +2,6 @@ import bcrypt from 'bcrypt';
 import { prisma } from '../../../lib/prisma';
 import { signJWT } from '../../../lib/auth';
 
-
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
