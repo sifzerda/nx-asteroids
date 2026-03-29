@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '../lib/authContext';
+import { useAuth } from '../lib/authProvider';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function Navigation() {
