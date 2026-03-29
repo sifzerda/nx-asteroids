@@ -96,9 +96,8 @@ function BulletSystem({ shipRef }) {
   const bullets = useRef([]);
   const keys = useRef({});
   const lastShot = useRef(0);
-  const [, setTick] = useState(0); // triggers re-render
+  const groupRef = useRef();
 
-  // handle key presses
   useEffect(() => {
     const handleKey = (e, down) => {
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
@@ -119,42 +118,47 @@ function BulletSystem({ shipRef }) {
   useFrame((_, delta) => {
     lastShot.current += delta;
 
-    // shoot bullets
-    if (keys.current['Space'] && lastShot.current > 0.1 && shipRef.current) {
+    if (keys.current['Space'] && lastShot.current > 0.25 && shipRef.current) {
       lastShot.current = 0;
+
       const dir = new THREE.Vector3(
         Math.sin(shipRef.current.rotation.z),
         Math.cos(shipRef.current.rotation.z),
         0
       );
 
+      const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.4, 16, 16),
+        new THREE.MeshBasicMaterial({ color: '#FFFF00' })
+      );
+      mesh.position.copy(shipRef.current.position);
+
       bullets.current.push({
-        pos: shipRef.current.position.clone(),
-        vel: dir.multiplyScalar(12 * WORLD_SCALE),
+        mesh,
+        vel: dir.multiplyScalar(8), // slower, reasonable speed
         life: 1.5,
       });
+
+      groupRef.current.add(mesh);
     }
 
-    // update bullets
     bullets.current.forEach(b => {
-      b.pos.addScaledVector(b.vel, delta);
+      b.mesh.position.addScaledVector(b.vel, delta); // no *60, smooth movement
       b.life -= delta;
     });
-    bullets.current = bullets.current.filter(b => b.life > 0);
 
-    setTick(t => t + 1); // force re-render
+    bullets.current = bullets.current.filter(b => {
+      if (b.life <= 0) {
+        groupRef.current.remove(b.mesh);
+        b.mesh.geometry.dispose();
+        b.mesh.material.dispose();
+        return false;
+      }
+      return true;
+    });
   });
 
-  return (
-    <>
-      {bullets.current.map((b, i) => (
-        <mesh key={i} position={b.pos}>
-          <sphereGeometry args={[0.2 * WORLD_SCALE, 8, 8]} />
-          <meshBasicMaterial color="cyan" />
-        </mesh>
-      ))}
-    </>
-  );
+  return <group ref={groupRef} />;
 }
 
 export default function Page() {
