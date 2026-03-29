@@ -98,6 +98,11 @@ function BulletSystem({ shipRef }) {
   const lastShot = useRef(0);
   const groupRef = useRef();
 
+  const BULLET_SPEED = 8;
+  const BULLET_LIFE = 1.5;
+  const WORLD_SCALE = 0.5;
+  const SHIP_HEIGHT = 1.2 * WORLD_SCALE; // same as ship geometry
+
   useEffect(() => {
     const handleKey = (e, down) => {
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
@@ -121,29 +126,31 @@ function BulletSystem({ shipRef }) {
     if (keys.current['Space'] && lastShot.current > 0.25 && shipRef.current) {
       lastShot.current = 0;
 
-      const dir = new THREE.Vector3(
-        Math.sin(shipRef.current.rotation.z),
-        Math.cos(shipRef.current.rotation.z),
-        0
-      );
+      // use unit vector along local Y axis and rotate to ship orientation
+      const forward = new THREE.Vector3(0, 1, 0);
+      forward.applyEuler(shipRef.current.rotation);
+
+      // tip offset along forward direction
+      const tipOffset = forward.clone().multiplyScalar(SHIP_HEIGHT / 2);
 
       const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.1, 16, 16),
-        new THREE.MeshBasicMaterial({ color: '#FFFF00' })
+        new THREE.SphereGeometry(0.1, 16, 16), // sphere bullet
+        new THREE.MeshBasicMaterial({ color: '#FFFF00' }) // neon yellow
       );
-      mesh.position.copy(shipRef.current.position);
+
+      mesh.position.copy(shipRef.current.position).add(tipOffset);
 
       bullets.current.push({
         mesh,
-        vel: dir.multiplyScalar(8), // slower, reasonable speed
-        life: 1.5,
+        vel: forward.multiplyScalar(BULLET_SPEED), // bullet velocity along forward
+        life: BULLET_LIFE,
       });
 
       groupRef.current.add(mesh);
     }
 
     bullets.current.forEach(b => {
-      b.mesh.position.addScaledVector(b.vel, delta); // no *60, smooth movement
+      b.mesh.position.addScaledVector(b.vel, delta);
       b.life -= delta;
     });
 
