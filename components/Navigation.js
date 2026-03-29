@@ -11,7 +11,7 @@ export default function Navigation() {
   const { isLoggedIn, logout } = useAuth();
 
     // Base links
-  const links = [{ href: '/', label: 'Asteroids' }];
+  const links = [{ href: '/', label: 'Three.js' }];
 
   // Conditional links
   if (isLoggedIn) {
@@ -19,6 +19,7 @@ export default function Navigation() {
     links.push({ label: 'Logout', onClick: null }); // placeholder
   } else {
     links.push(
+      { href: '/matter', label: 'Matter.js' },
       { href: '/signup', label: 'Signup' },
       { href: '/login', label: 'Login' }
     );

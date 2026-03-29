@@ -1,4 +1,5 @@
 // components/Asteroids.js
+// this is asteroids game in react-three-fiber
 'use client';
 
 import { useRef } from 'react';
