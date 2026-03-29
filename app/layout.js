@@ -36,8 +36,7 @@ export default function RootLayout({ children }) {
           <main className="min-h-screen flex flex-col m-2 rounded-md neon-cyan gradient-border">
             {children}
           </main>
-
-
+ 
           <Footer />
         </AuthProvider>
 

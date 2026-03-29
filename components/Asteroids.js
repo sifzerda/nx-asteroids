@@ -128,7 +128,7 @@ function BulletSystem({ shipRef }) {
       );
 
       const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(0.4, 16, 16),
+        new THREE.SphereGeometry(0.1, 16, 16),
         new THREE.MeshBasicMaterial({ color: '#FFFF00' })
       );
       mesh.position.copy(shipRef.current.position);
