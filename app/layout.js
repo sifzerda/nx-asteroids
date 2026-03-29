@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
+import AuthProvider from "../components/AuthProvider";
 import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
@@ -28,16 +28,18 @@ export default function RootLayout({ children }) {
 
       <body className="min-h-full flex flex-col">
 
-        <Header />
- 
-        <Navigation />
+        <AuthProvider>
+          <Header />
 
-        <main className="min-h-screen flex flex-col m-2 rounded-md neon-cyan gradient-border">
-          {children}
-        </main>
+          <Navigation />
 
- 
-        <Footer />
+          <main className="min-h-screen flex flex-col m-2 rounded-md neon-cyan gradient-border">
+            {children}
+          </main>
+
+
+          <Footer />
+        </AuthProvider>
 
       </body>
     </html>
