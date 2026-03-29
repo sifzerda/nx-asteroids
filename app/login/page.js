@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../lib/authProvider';
+import { useAuth } from '../../lib/authContext';
 
 export default function Login() {
     const [email, setEmail] = useState('');
