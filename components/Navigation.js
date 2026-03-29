@@ -15,7 +15,7 @@ export default function Navigation() {
 
   // Conditional links
   if (isLoggedIn) {
-    links.push({ href: '/profile', label: 'Profile' });
+    //links.push({ href: '/profile', label: 'Profile' });
     links.push({ label: 'Logout', onClick: null }); // placeholder
   } else {
     links.push(

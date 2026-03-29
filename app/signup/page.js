@@ -1,5 +1,4 @@
 // app/signup.js
-
 'use client';
 
 import { useState } from 'react';
@@ -20,14 +19,14 @@ export default function Signup() {
     const res = await fetch('/api/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, username }),
     });
 
     const data = await res.json();
 
     if (res.ok) {
       login(data.token); // update context so nav shows "Logout"
-      router.push('/profile'); // redirect
+      router.push('/'); // redirect
     } else {
       setMessage(data.error || 'Signup failed');
     }

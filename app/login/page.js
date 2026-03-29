@@ -1,5 +1,4 @@
 // app/login.js
-
 'use client';
 
 import { useState } from 'react';
@@ -27,7 +26,7 @@ export default function Login() {
 
         if (res.ok) {
             login(data.token); // update context
-            router.push('/profile'); // redirect
+            router.push('/'); // redirect
         } else {
             setMessage(data.error || 'Login failed');
         }

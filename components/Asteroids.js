@@ -2,12 +2,13 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
-function Ship() {
-    const ref = useRef();
+const WORLD_SCALE = 0.5;
+
+function Ship({ shipRef }) {
     const keys = useRef({});
 
     // physics state (not React state — important)
@@ -15,15 +16,26 @@ function Ship() {
     const rotationVel = useRef(0);
 
     // tuned values (important)
-    const TURN_ACCEL = 3.5;   // how fast rotation builds
-    const TURN_DAMP = 0.85;   // rotation friction
-    const THRUST = 12;        // acceleration
+    const TURN_ACCEL = 3.5;
+    const TURN_DAMP = 0.85;
+    const THRUST = 12 * WORLD_SCALE;
     const DRAG = 0.99;
-    const MAX_SPEED = 12;
+    const MAX_SPEED = 12 * WORLD_SCALE;
 
     useEffect(() => {
-        const down = (e) => (keys.current[e.code] = true);
-        const up = (e) => (keys.current[e.code] = false);
+const down = (e) => {
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+        e.preventDefault(); // 🚫 stop scrolling
+    }
+    keys.current[e.code] = true;
+};
+
+const up = (e) => {
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+        e.preventDefault();
+    }
+    keys.current[e.code] = false;
+};
 
         window.addEventListener('keydown', down);
         window.addEventListener('keyup', up);
@@ -43,13 +55,13 @@ function Ship() {
 
         // apply damping
         rotationVel.current *= TURN_DAMP;
-        ref.current.rotation.z += rotationVel.current;
+        shipRef.current.rotation.z += rotationVel.current;
 
         // ===== THRUST =====
         if (k['ArrowUp']) {
             const forward = new THREE.Vector3(0, 1, 0); // cone points up
 
-            forward.applyEuler(ref.current.rotation);
+            forward.applyEuler(shipRef.current.rotation);
             velocity.current.addScaledVector(forward, THRUST * delta);
         }
 
@@ -62,97 +74,108 @@ function Ship() {
             velocity.current.multiplyScalar(MAX_SPEED / speed);
         }
 
-        ref.current.position.addScaledVector(velocity.current, delta * 60);
+        shipRef.current.position.addScaledVector(velocity.current, delta * 60);
 
         // screen wrap (simple bounds)
         const limit = 10;
-        if (ref.current.position.x > limit) ref.current.position.x = -limit;
-        if (ref.current.position.x < -limit) ref.current.position.x = limit;
-        if (ref.current.position.y > limit) ref.current.position.y = -limit;
-        if (ref.current.position.y < -limit) ref.current.position.y = limit;
+        if (shipRef.current.position.x > limit) shipRef.current.position.x = -limit;
+        if (shipRef.current.position.x < -limit) shipRef.current.position.x = limit;
+        if (shipRef.current.position.y > limit) shipRef.current.position.y = -limit;
+        if (shipRef.current.position.y < -limit) shipRef.current.position.y = limit;
     });
 
     return (
-        <mesh ref={ref}>
-            {/* Make sure the cone points UP */}
-            <coneGeometry args={[0.5, 1.2, 3]} />
+        <mesh ref={shipRef}>
+            <coneGeometry args={[0.5 * WORLD_SCALE, 1.2 * WORLD_SCALE, 3]} />
             <meshBasicMaterial color="cyan" wireframe />
         </mesh>
     );
 }
 
-function BulletSystem() {
-    const bullets = useRef([]);
+function BulletSystem({ shipRef }) {
+  const bullets = useRef([]);
+  const keys = useRef({});
+  const lastShot = useRef(0);
+  const [, setTick] = useState(0); // triggers re-render
 
-    const keys = useRef({});
-    const lastShot = useRef(0);
+  // handle key presses
+  useEffect(() => {
+    const handleKey = (e, down) => {
+      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+        e.preventDefault();
+      }
+      keys.current[e.code] = down;
+    };
 
-    useEffect(() => {
-        const down = (e) => (keys.current[e.code] = true);
-        const up = (e) => (keys.current[e.code] = false);
+    window.addEventListener('keydown', e => handleKey(e, true));
+    window.addEventListener('keyup', e => handleKey(e, false));
 
-        window.addEventListener('keydown', down);
-        window.addEventListener('keyup', up);
+    return () => {
+      window.removeEventListener('keydown', e => handleKey(e, true));
+      window.removeEventListener('keyup', e => handleKey(e, false));
+    };
+  }, []);
 
-        return () => {
-            window.removeEventListener('keydown', down);
-            window.removeEventListener('keyup', up);
-        };
-    }, []);
+  useFrame((_, delta) => {
+    lastShot.current += delta;
 
-    useFrame((state, delta) => {
-        const time = state.clock.elapsedTime;
+    // shoot bullets
+    if (keys.current['Space'] && lastShot.current > 0.1 && shipRef.current) {
+      lastShot.current = 0;
+      const dir = new THREE.Vector3(
+        Math.sin(shipRef.current.rotation.z),
+        Math.cos(shipRef.current.rotation.z),
+        0
+      );
 
-        // shoot
-        if (keys.current['Space'] && time - lastShot.current > 0.15) {
-            lastShot.current = time;
+      bullets.current.push({
+        pos: shipRef.current.position.clone(),
+        vel: dir.multiplyScalar(12 * WORLD_SCALE),
+        life: 1.5,
+      });
+    }
 
-            const ship = state.scene.children.find(obj => obj.type === 'Mesh');
-
-            if (ship) {
-                const dir = new THREE.Vector3(
-                    Math.sin(ship.rotation.z),
-                    Math.cos(ship.rotation.z),
-                    0
-                );
-
-                bullets.current.push({
-                    pos: ship.position.clone(),
-                    vel: dir.multiplyScalar(20),
-                    life: 1.5,
-                });
-            }
-        }
-
-        bullets.current.forEach(b => {
-            b.pos.addScaledVector(b.vel, delta);
-            b.life -= delta;
-        });
-
-        bullets.current = bullets.current.filter(b => b.life > 0);
+    // update bullets
+    bullets.current.forEach(b => {
+      b.pos.addScaledVector(b.vel, delta);
+      b.life -= delta;
     });
+    bullets.current = bullets.current.filter(b => b.life > 0);
 
-    return (
-        <>
-            {bullets.current.map((b, i) => (
-                <mesh key={i} position={b.pos}>
-                    <sphereGeometry args={[0.1, 8, 8]} />
-                    <meshBasicMaterial color="cyan" />
-                </mesh>
-            ))}
-        </>
-    );
+    setTick(t => t + 1); // force re-render
+  });
+
+  return (
+    <>
+      {bullets.current.map((b, i) => (
+        <mesh key={i} position={b.pos}>
+          <sphereGeometry args={[0.2 * WORLD_SCALE, 8, 8]} />
+          <meshBasicMaterial color="cyan" />
+        </mesh>
+      ))}
+    </>
+  );
 }
 
 export default function Page() {
+    const shipRef = useRef();
+
     return (
         <Canvas
-            camera={{ position: [0, 0, 15] }}
-            style={{ background: 'black', height: '100vh', border: '1px solid cyan', boxSizing: 'border-box', }}
+            tabIndex={0}
+            onClick={(e) => e.target.focus()}
+            camera={{ position: [0, 0, 10] }}
+            style={{
+                background: 'black',
+                width: '600px',    
+                height: '600px',    
+                border: '1px solid cyan',
+                boxSizing: 'border-box',
+            }}
         >
-            <Ship />
-            <BulletSystem />
-            {/* 👇 ADD IT HERE (at the end is best) */}
+            <Ship shipRef={shipRef} />
+            <BulletSystem shipRef={shipRef} />
+
             <EffectComposer>
                 <Bloom intensity={1.5} luminanceThreshold={0.2} />
             </EffectComposer>
