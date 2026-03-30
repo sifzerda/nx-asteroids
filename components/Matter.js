@@ -13,19 +13,10 @@ const MatterGame = () => {
     const [engine] = useState(Engine.create());
     const [shipPosition, setShipPosition] = useState({ x: 300, y: 300, rotation: 0 });
 
-
-
     const [ship, setShip] = useState(null);
     const [rotationSpeed] = useState(0.15);
 
-
-    const [score, setScore] = useState(0);
-    const [lives, setLives] = useState(3);
-
-    const [gameOver, setGameOver] = useState(false);
-
     const gameRef = useRef();
-
 
     //const decomp = require('poly-decomp');
     //const MatterWrap = require('matter-wrap');
@@ -45,59 +36,45 @@ const MatterGame = () => {
 
 
     //---------------------------------// MATTER.JS SETUP //-----------------------------------//
+    // Fixed virtual world size
+    const worldWidth = 1650;
+    const worldHeight = 800;
+
     useEffect(() => {
         window.decomp = decomp;
         Matter.use(MatterWrap);
         engine.world.gravity.y = 0;
 
         const container = gameRef.current;
-        const width = container.clientWidth;
-        const height = container.clientHeight;
 
         const render = Render.create({
             element: container,
             engine,
             options: {
-                width,
-                height,
+                width: worldWidth,
+                height: worldHeight,
                 wireframes: false,
                 background: '#000',
             },
         });
-        Render.run(render);
 
+        Render.run(render);
         const runner = Matter.Runner.create();
         Matter.Runner.run(runner, engine);
 
         // Ship body
         const vertices = [{ x: 0, y: 0 }, { x: 34, y: 14 }, { x: 0, y: 27 }];
 
-        const shipBody = Bodies.fromVertices(width / 2, height / 2, vertices, {
+        const shipBody = Bodies.fromVertices(render.options.width / 2, render.options.height / 2, vertices, {
             frictionAir: 0.02,
             restitution: 0,
             friction: 0.02,
-            render: {
-                fillStyle: 'transparent',
-                strokeStyle: '#ffffff',
-                lineWidth: 2,
-                visible: true,
-            },
-            plugin: {
-                wrap: {
-                    min: { x: 0, y: 0 },
-                    max: { x: width, y: height },
-                },
-            },
+            render: { fillStyle: 'transparent', strokeStyle: '#ffffff', lineWidth: 2, visible: true },
+            plugin: { wrap: { min: { x: 0, y: 0 }, max: { x: render.options.width, y: render.options.height } } },
         });
-
         Body.rotate(shipBody, -Math.PI / 2);
         setShip(shipBody);
         World.add(engine.world, shipBody);
-
-        // Create initial asteroids
-
-        // Set up an interval to create new asteroids every 20 seconds
-
 
         const updateShipPosition = () => {
             setShipPosition({
@@ -106,23 +83,34 @@ const MatterGame = () => {
                 rotation: shipBody.angle * (180 / Math.PI)
             });
         };
-
         Events.on(engine, 'beforeUpdate', updateShipPosition);
 
-return () => {
-    Render.stop(render);
-    Matter.Runner.stop(runner);
-    World.clear(engine.world);
-    Engine.clear(engine);
 
-    if (render.canvas) {
-        render.canvas.remove();
-    }
 
-    render.textures = {};
+    // Scale canvas visually to fit container
+    const scaleCanvas = () => {
+        const scaleX = container.clientWidth / worldWidth;
+        const scaleY = container.clientHeight / worldHeight;
+        const scale = Math.min(scaleX, scaleY);
+        render.canvas.style.transformOrigin = 'top left';
+        render.canvas.style.transform = `scale(${scale})`;
+        render.canvas.style.width = `${worldWidth}px`;
+        render.canvas.style.height = `${worldHeight}px`;
+    };
 
-    Events.off(engine, 'beforeUpdate', updateShipPosition);
-};
+        window.addEventListener('resize', scaleCanvas);
+        scaleCanvas();
+
+        return () => {
+            window.removeEventListener('resize', scaleCanvas);
+            Render.stop(render);
+            Matter.Runner.stop(runner);
+            World.clear(engine.world);
+            Engine.clear(engine);
+            if (render.canvas) render.canvas.remove();
+            render.textures = {};
+            Events.off(engine, 'beforeUpdate', updateShipPosition);
+        };
     }, []);
 
     //---------------------------------// HOTKEYS //-----------------------------------//
@@ -172,17 +160,14 @@ return () => {
 
 
     //---------------------------------// RENDERING //-----------------------------------//
-    return (
-        <div className="w-full max-w-4xl mx-auto mt-4">
-
-            <div
-                ref={gameRef}
-                className="w-full h-[500px] border border-gray-700 rounded-xl overflow-hidden"
-            />
-
-        </div>
-
-    );
+return (
+    <div className="w-full max-w-4xl mx-auto mt-4">
+        <div
+            ref={gameRef}
+            className="w-full h-[auto] border border-gray-700 rounded-xl overflow-hidden"
+        />
+    </div>
+);
 };
 
 export default MatterGame;
