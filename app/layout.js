@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
 
           <Navigation />
 
-          <main className="min-h-screen flex flex-col m-2 rounded-md neon-cyan gradient-border">
+          <main className="flex-1 flex flex-col mx-2 mb-2 rounded-md neon-cyan gradient-border overflow-hidden">
             {children}
           </main>
  
