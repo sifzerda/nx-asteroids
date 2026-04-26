@@ -1,5 +1,4 @@
 // components/Matter.js
-// this is asteroids game in matter-js
 
 'use client';
 
@@ -18,23 +17,7 @@ const MatterGame = () => {
 
     const gameRef = useRef();
 
-    //const decomp = require('poly-decomp');
-    //const MatterWrap = require('matter-wrap');
-
-    //window.decomp = decomp; // poly-decomp is available globally
-
     //---------------------------------// ASTEROIDS UTILS //-----------------------------------//
-
-
-    //------------------------// asteroids explode on ship hit //-------------------------//
-
-    // Function to emit explosion particles
-
-
-    //------------------------// a
-
-
-
     //---------------------------------// MATTER.JS SETUP //-----------------------------------//
     // Fixed virtual world size
     const worldWidth = 1650;
@@ -84,8 +67,6 @@ const MatterGame = () => {
             });
         };
         Events.on(engine, 'beforeUpdate', updateShipPosition);
-
-
 
     // Scale canvas visually to fit container
     const scaleCanvas = () => {
@@ -137,11 +118,7 @@ const MatterGame = () => {
     };
 
     //-------------------------------- SHIP EXHAUST PARTICLES ---------------------------//
-
-
     //----------------------------------- SHOOTING ------------------------------//
-
-
     // --------------------------------// HOTKEYS //-----------------------------------//
 
     useHotkeys('up', moveShipUp, [ship]);
@@ -149,16 +126,8 @@ const MatterGame = () => {
     useHotkeys('left', rotateShipLeft, [ship, rotationSpeed]);
     useHotkeys('right', rotateShipRight, [ship, rotationSpeed]);
 
-
-    // Handling asteroid and projectile collisions:
-
     //---------------------------------- // CRASH HANDLING //---------------------------------------//
-
-
     //--------------------------------// CLOCKING SCORE //----------------------------------//
-
-
-
     //---------------------------------// RENDERING //-----------------------------------//
 return (
     <div className="w-full max-w-4xl mx-auto mt-4">
