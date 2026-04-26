@@ -41,13 +41,11 @@ export default function Login() {
                 <div className="w-full max-w-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-8 flex flex-col items-center">
 
                     {/* Top gold line */}
-                    <div className="w-full h-[2px] bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 mb-6" />
+                    <div className="w-full h-[2px] bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 mb-6" />
 
                     {/* Title */}
                     <h1 className="text-3xl tracking-wide mb-6 text-black dark:text-white flex items-center gap-2">
-                        <span className="text-red-500">♦</span>
                         <span className="font-[var(--font-cinzel)]">Login</span>
-                        <span className="text-red-500">♥</span>
                     </h1>
 
                     {/* Form */}
@@ -85,10 +83,10 @@ export default function Login() {
 
                     {/* Divider suits */}
                     <div className="flex items-center gap-3 text-lg my-6">
-                        <span className="text-blue-400">♠</span>
-                        <span className="text-red-500">♥</span>
-                        <span className="text-blue-400">♣</span>
-                        <span className="text-red-500">♦</span>
+                        <span>☄️</span>
+                        <span>☄️</span>
+                        <span>☄️</span>
+                        <span>☄️</span>
                     </div>
 
                     {/* Bottom text */}

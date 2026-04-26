@@ -14,23 +14,23 @@ export default function Signup() {
     const { login } = useAuth();
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    const res = await fetch('/api/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, username }),
-    });
+        const res = await fetch('/api/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, username }),
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if (res.ok) {
-      login(data.token); // update context so nav shows "Logout"
-      router.push('/'); // redirect
-    } else {
-      setMessage(data.error || 'Signup failed');
-    }
-  };
+        if (res.ok) {
+            login(data.token); // update context so nav shows "Logout"
+            router.push('/'); // redirect
+        } else {
+            setMessage(data.error || 'Signup failed');
+        }
+    };
 
     return (
         <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
@@ -41,13 +41,11 @@ export default function Signup() {
                 <div className="w-full max-w-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-8 flex flex-col items-center">
 
                     {/* Top gold line */}
-                    <div className="w-full h-[2px] bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 mb-6" />
+                    <div className="w-full h-[2px] bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 mb-6" />
 
                     {/* Title */}
                     <h1 className="text-3xl tracking-wide mb-6 text-black dark:text-white flex items-center gap-2">
-                        <span className="text-red-500">♦</span>
                         <span className="font-[var(--font-cinzel)]">Sign Up</span>
-                        <span className="text-red-500">♥</span>
                     </h1>
 
                     {/* Form */}
@@ -91,10 +89,10 @@ export default function Signup() {
 
                     {/* Suits divider */}
                     <div className="flex items-center gap-3 text-lg my-6">
-                        <span className="text-blue-400">♠</span>
-                        <span className="text-red-500">♥</span>
-                        <span className="text-blue-400">♣</span>
-                        <span className="text-red-500">♦</span>
+                        <span>☄️</span>
+                        <span>☄️</span>
+                        <span>☄️</span>
+                        <span>☄️</span>
                     </div>
 
                     {/* Bottom text */}
