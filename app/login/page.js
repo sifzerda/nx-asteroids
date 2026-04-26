@@ -57,8 +57,7 @@ export default function Login() {
                             className="w-full px-4 py-2 bg-transparent border border-zinc-300 dark:border-zinc-700 text-black dark:text-white focus:outline-none focus:border-blue-500"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
+                            required />
 
                         <input
                             type="password"
@@ -66,13 +65,11 @@ export default function Login() {
                             className="w-full px-4 py-2 bg-transparent border border-zinc-300 dark:border-zinc-700 text-black dark:text-white focus:outline-none focus:border-blue-500"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
+                            required />
 
                         <button
                             type="submit"
-                            className="mt-4 w-full py-2 bg-black text-white border border-zinc-700 hover:bg-zinc-900 transition"
-                        >
+                            className="mt-4 w-full py-2 bg-black text-white border border-zinc-700 hover:bg-zinc-900 transition">
                             Sign In
                         </button>
 
