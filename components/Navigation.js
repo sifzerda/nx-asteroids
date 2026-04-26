@@ -7,11 +7,11 @@ import { usePathname, useRouter } from 'next/navigation';
 
 export default function Navigation() {
   const pathname = usePathname();
-  const router = useRouter(); // must be here, inside component
+  const router = useRouter(); 
   const { isLoggedIn, logout } = useAuth();
 
     // Base links
-  const links = [{ href: '/', label: 'Three.js' }];
+  const links = [{ href: '/', label: 'Play' }];
 
   // Conditional links
   if (isLoggedIn) {
@@ -26,7 +26,7 @@ export default function Navigation() {
 
   return (
     <nav className="w-full bg-black text-white">
-      <div className="h-[2px] bg-yellow-500 w-full" />
+      <div className="h-[2px] bg-blue-900 w-full" />
       <div className="flex justify-center py-3">
         <ul className="flex gap-3">
           {links.map(({ href, label, onClick }) => {
