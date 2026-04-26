@@ -1,5 +1,4 @@
 // components/Asteroids.js
-// this is asteroids game in react-three-fiber
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
@@ -52,7 +51,11 @@ export default function Asteroids() {
         <Ship bulletsRef={bulletsRef} />
         <Rocks bulletsRef={bulletsRef} />
         <EffectComposer>
-          <Bloom intensity={1.5} luminanceThreshold={0.2} />
+          <Bloom
+            intensity={2.0}
+            luminanceThreshold={0.05}
+            luminanceSmoothing={0.9}
+          />
         </EffectComposer>
       </Canvas>
     </div>
