@@ -19,7 +19,6 @@ export default function Navigation() {
     links.push({ label: 'Logout', onClick: null }); // placeholder
   } else {
     links.push(
-      { href: '/matter', label: 'Matter.js' },
       { href: '/signup', label: 'Signup' },
       { href: '/login', label: 'Login' }
     );
@@ -60,8 +59,7 @@ export default function Navigation() {
                         ? 'border-cyan-400 text-cyan-300 shadow-[0_0_6px_#00eaff]'
                         : 'border-cyan-500/40 text-gray-400 hover:text-white hover:border-cyan-400'}
                         transition-all
-                    `}
-                  >
+                    `}>
                     {label}
                   </Link>
                 )}

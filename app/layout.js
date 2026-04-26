@@ -5,8 +5,6 @@ import Header from '../components/Header';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
-import UnderConstructionBanner from '../components/Construction';
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -31,11 +29,6 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col">
 
         <AuthProvider>
-
-
-           <UnderConstructionBanner />
-
-
 
           <Header />
 
