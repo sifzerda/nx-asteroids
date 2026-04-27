@@ -9,11 +9,11 @@ const ASTEROID_MIN_SPEED = 0.5;
 const ASTEROID_MAX_SPEED = 2;
 const SPAWN_INTERVAL = 2;
 
-// size system (REAL fix)
+// size system
 const ASTEROID_SIZES = {
-  LARGE: 0.8,
-  MEDIUM: 0.5,
-  SMALL: 0.25,
+  LARGE: 1.0,
+  MEDIUM: 7.5,
+  SMALL: 0.5,
 };
 
 export default function Rocks({ bulletsRef }) {
