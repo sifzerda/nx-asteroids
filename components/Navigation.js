@@ -11,7 +11,7 @@ export default function Navigation() {
   const { isLoggedIn, logout } = useAuth();
 
     // Base links
-  const links = [{ href: '/', label: 'Play' }];
+  const links = [{ href: '/', label: 'Play' }, { href: '/about', label: 'About' }];
 
   // Conditional links
   if (isLoggedIn) {

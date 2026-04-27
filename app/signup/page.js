@@ -35,7 +35,7 @@ export default function Signup() {
     return (
         <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
 
-            <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center py-24 px-16 bg-white dark:bg-black">
+            <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center py-18 px-16 bg-white dark:bg-black">
 
                 {/* Card */}
                 <div className="w-full max-w-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-8 flex flex-col items-center">
