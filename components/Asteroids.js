@@ -34,8 +34,7 @@ export default function Asteroids() {
     <div
       ref={containerRef}
       className="w-full max-w-4xl mx-auto mt-4"
-      style={{ aspectRatio: '1 / 1' }} // keep square
-    >
+      style={{ aspectRatio: '1 / 1' }}>
       <Canvas
         tabIndex={0}
         onClick={e => e.target.focus()}
@@ -46,8 +45,7 @@ export default function Asteroids() {
           background: 'black',
           border: '1px solid cyan',
           boxSizing: 'border-box',
-        }}
-      >
+        }}>
         <Ship bulletsRef={bulletsRef} />
         <Rocks bulletsRef={bulletsRef} />
         <EffectComposer>
