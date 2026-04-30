@@ -52,9 +52,9 @@ export default function Asteroids() {
         <Rocks bulletsRef={bulletsRef} />
         <EffectComposer>
           <Bloom
-            intensity={2.0}
-            luminanceThreshold={0.05}
-            luminanceSmoothing={0.9}
+            intensity={2.5}
+            luminanceThreshold={0}
+            luminanceSmoothing={0}
           />
         </EffectComposer>
       </Canvas>
