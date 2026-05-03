@@ -1,7 +1,7 @@
 // app/login.js
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/authContext';
 
@@ -11,6 +11,25 @@ export default function Login() {
     const [message, setMessage] = useState(null);
     const router = useRouter();
     const { login } = useAuth();
+
+    const [typedTitle, setTypedTitle] = useState("");
+
+    const fullTitle = "SYSTEM LOGIN";
+
+    useEffect(() => {
+        let i = 0;
+
+        const interval = setInterval(() => {
+            setTypedTitle(fullTitle.slice(0, i + 1));
+            i++;
+
+            if (i >= fullTitle.length) {
+                clearInterval(interval);
+            }
+        }, 120); // speed per letter
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -42,7 +61,8 @@ export default function Login() {
                 {/* terminal header */}
                 <div className="mb-6 text-center">
                     <h1 className="text-xl tracking-[0.3em] uppercase text-green-300 drop-shadow-[0_0_6px_rgba(0,255,0,0.6)]">
-                        SYSTEM LOGIN
+                        {typedTitle}
+                        <span className="cursor-blink">▍</span>
                     </h1>
 
                     <p className="text-[10px] tracking-[0.3em] text-green-600 mt-2">
@@ -56,17 +76,21 @@ export default function Login() {
                     <input
                         type="email"
                         placeholder="EMAIL>"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         className="w-full bg-black border border-green-700 px-3 py-2 text-green-300 placeholder-green-800 focus:outline-none focus:border-green-400"
                     />
 
                     <input
                         type="password"
                         placeholder="PASSWORD>"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         className="w-full bg-black border border-green-700 px-3 py-2 text-green-300 placeholder-green-800 focus:outline-none focus:border-green-400"
                     />
 
                     <button className="w-full mt-2 border border-green-500 text-green-300 py-2 uppercase tracking-widest hover:bg-green-900/20 transition">
-                        ENTER
+                        ENTER &gt;
                     </button>
 
                     {message && (
