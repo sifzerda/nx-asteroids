@@ -142,10 +142,25 @@ body {
 
 /* subtle flicker */
 @keyframes flicker {
-  0%, 100% { opacity: 1; }
-  92% { opacity: 0.85; }
-  93% { opacity: 0.4; }
-  94% { opacity: 1; }
+  0% {
+    opacity: 0.86;
+    filter: brightness(0.9);
+  }
+
+  30% {
+    opacity: 0.94;
+    filter: brightness(1.02);
+  }
+
+  60% {
+    opacity: 1;
+    filter: brightness(1.1);
+  }
+
+  100% {
+    opacity: 0.86;
+    filter: brightness(0.9);
+  }
 }
 
 .crt-screen {

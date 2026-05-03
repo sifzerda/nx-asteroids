@@ -33,7 +33,7 @@ export default function Login() {
     };
 
     return (
-        <div className="flex flex-1 items-center justify-center bg-black font-mono text-green-400 relative overflow-hidden animate-[flicker_2.5s_infinite]">
+        <div className="flex flex-1 items-center justify-center bg-black font-mono text-green-400 relative overflow-hidden animate-[flicker_7s_ease-in-out_infinite]">
             <main className="relative w-full max-w-md p-8 border border-green-500/40 bg-black shadow-[0_0_20px_rgba(0,255,0,0.15)] overflow-hidden">
 
                 {/* scanline overlay */}
@@ -77,10 +77,12 @@ export default function Login() {
                 </form>
 
                 {/* footer terminal noise */}
-                <div className="mt-6 text-[10px] tracking-[0.3em] text-green-700">
-                    ▓▒░ CONNECTION STABLE ░▒▓
+                <div className="mt-6 text-xs tracking-[0.3em] text-green-700">
+                    Don't have an account?{" "}
+                    <a href="/signup" className="text-white hover:underline">
+                        Sign up
+                    </a>
                 </div>
-
             </main>
         </div>
     );
