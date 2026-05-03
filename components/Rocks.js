@@ -28,9 +28,7 @@ const BULLET_DAMAGE = 100;
 export default function Rocks({ bulletsRef }) {
   const asteroids = useRef([]);
   const fragments = useRef([]);
-
   const groupRef = useRef();
-
   const spawnTimer = useRef(0);
 
   const rand = (min, max) =>

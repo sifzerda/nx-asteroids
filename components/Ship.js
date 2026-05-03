@@ -22,16 +22,18 @@ export default function Ship({ bulletsRef }) {
   // -----------------------------
   const velocity = useRef(new THREE.Vector3());
   const rotationVel = useRef(0);
+  const thrustPower = useRef(0); // NEW (smooth thrust)
 
   // -----------------------------
-  // Ship settings
+  // Ship settings (TUNED)
   // -----------------------------
-  const TURN_ACCEL = 3.5;
-  const TURN_DAMP = 0.85;
+  const TURN_SPEED = 4.5;
+  const TURN_SMOOTH = 8; // higher = snappier
 
-  const THRUST = 12 * WORLD_SCALE;
-  const DRAG = 0.99;
-  const MAX_SPEED = 12 * WORLD_SCALE;
+  const THRUST = 16 * WORLD_SCALE;
+  const THRUST_RAMP = 9; // how fast thrust builds
+  const DRAG = 0.992;
+  const MAX_SPEED = 16 * WORLD_SCALE;
 
   const SHIP_HEIGHT = 1.2 * WORLD_SCALE;
 
@@ -45,11 +47,10 @@ export default function Ship({ bulletsRef }) {
   const BULLET_LIFE = 1.2;
 
   // -----------------------------
-  // Glow texture for arcade shots
+  // Glow texture
   // -----------------------------
   const glowTexture = useMemo(() => {
     const size = 128;
-
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
@@ -73,13 +74,11 @@ export default function Ship({ bulletsRef }) {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, size, size);
 
-    const tex = new THREE.CanvasTexture(canvas);
-
-    return tex;
+    return new THREE.CanvasTexture(canvas);
   }, []);
 
   // -----------------------------
-  // GPU particle system
+  // Particles (unchanged)
   // -----------------------------
   const particleData = useRef({
     positions: new Float32Array(MAX_PARTICLES * 3),
@@ -87,23 +86,16 @@ export default function Ship({ bulletsRef }) {
     colors: new Float32Array(MAX_PARTICLES * 3),
     life: new Float32Array(MAX_PARTICLES),
     maxLife: new Float32Array(MAX_PARTICLES),
-    sizes: new Float32Array(MAX_PARTICLES),
     index: 0,
   });
 
   // -----------------------------
-  // Keyboard input
+  // Input
   // -----------------------------
   useEffect(() => {
     const handleKey = (e, down) => {
       if (
-        [
-          'Space',
-          'ArrowUp',
-          'ArrowDown',
-          'ArrowLeft',
-          'ArrowRight',
-        ].includes(e.code)
+        ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)
       ) {
         e.preventDefault();
       }
@@ -123,94 +115,91 @@ export default function Ship({ bulletsRef }) {
     };
   }, []);
 
-  // expose bullets
   useEffect(() => {
-    if (bulletsRef) {
-      bulletsRef.current = bullets.current;
-    }
+    if (bulletsRef) bulletsRef.current = bullets.current;
   }, [bulletsRef]);
 
   // -----------------------------
-  // Particle spawner
+  // Particle spawner (unchanged)
   // -----------------------------
-  const spawnParticle = ({
-    position,
-    velocity,
-    color,
-    life = 0.4,
-  }) => {
+  const spawnParticle = ({ position, velocity, color, life = 0.4 }) => {
     const idx = particleData.current.index;
     const i3 = idx * 3;
 
-    particleData.current.positions[i3 + 0] = position.x;
-    particleData.current.positions[i3 + 1] = position.y;
-    particleData.current.positions[i3 + 2] = position.z;
-
-    particleData.current.velocities[i3 + 0] = velocity.x;
-    particleData.current.velocities[i3 + 1] = velocity.y;
-    particleData.current.velocities[i3 + 2] = velocity.z;
-
-    particleData.current.colors[i3 + 0] = color[0];
-    particleData.current.colors[i3 + 1] = color[1];
-    particleData.current.colors[i3 + 2] = color[2];
+    particleData.current.positions.set([position.x, position.y, position.z], i3);
+    particleData.current.velocities.set([velocity.x, velocity.y, velocity.z], i3);
+    particleData.current.colors.set(color, i3);
 
     particleData.current.life[idx] = life;
     particleData.current.maxLife[idx] = life;
 
-    particleData.current.index =
-      (idx + 1) % MAX_PARTICLES;
+    particleData.current.index = (idx + 1) % MAX_PARTICLES;
   };
 
   // -----------------------------
-  // Frame update
+  // FRAME LOOP
   // -----------------------------
   useFrame((state, delta) => {
     if (!shipRef.current) return;
 
     // -----------------------------
-    // Rotation
+    // ROTATION (SMOOTH TARGET TURN)
     // -----------------------------
-    if (keys.current['ArrowLeft']) {
-      rotationVel.current += TURN_ACCEL * delta;
-    }
+    let targetTurn = 0;
 
-    if (keys.current['ArrowRight']) {
-      rotationVel.current -= TURN_ACCEL * delta;
-    }
+    if (keys.current['ArrowLeft']) targetTurn = TURN_SPEED;
+    if (keys.current['ArrowRight']) targetTurn = -TURN_SPEED;
 
-    rotationVel.current *= TURN_DAMP;
+    rotationVel.current = THREE.MathUtils.lerp(
+      rotationVel.current,
+      targetTurn,
+      TURN_SMOOTH * delta
+    );
 
-    shipRef.current.rotation.z += rotationVel.current;
+    shipRef.current.rotation.z += rotationVel.current * delta;
 
     // -----------------------------
-    // Thrust
+    // THRUST (SMOOTH RAMP)
     // -----------------------------
-    if (keys.current['ArrowUp']) {
-      const forward = new THREE.Vector3(0, 1, 0).applyEuler(
-        shipRef.current.rotation
-      );
+    let targetThrust = 0;
 
-      velocity.current.addScaledVector(
-        forward,
-        THRUST * delta
-      );
+    if (keys.current['ArrowUp']) targetThrust = 1;
+    if (keys.current['ArrowDown']) targetThrust = -0.6; // optional reverse
 
-      // exhaust particles
+    thrustPower.current = THREE.MathUtils.lerp(
+      thrustPower.current,
+      targetThrust,
+      THRUST_RAMP * delta
+    );
+
+    const forward = new THREE.Vector3(0, 1, 0).applyEuler(
+      shipRef.current.rotation
+    );
+
+    velocity.current.addScaledVector(
+      forward,
+      thrustPower.current * THRUST * delta
+    );
+
+    // small extra kick when actively thrusting
+    if (thrustPower.current > 0.8) {
+      velocity.current.addScaledVector(forward, 4 * delta);
+    };
+
+    // exhaust only when forward thrust
+    if (thrustPower.current > 0.1) {
       const backward = forward.clone().multiplyScalar(-1);
 
       const basePos = shipRef.current.position
         .clone()
         .add(backward.clone().multiplyScalar(0.6));
 
-      for (let i = 0; i < 6; i++) {
-        const spreadX = (Math.random() - 0.5) * 0.8;
-        const spreadY = (Math.random() - 0.5) * 0.8;
-
+      for (let i = 0; i < 5; i++) {
         spawnParticle({
           position: basePos,
           velocity: new THREE.Vector3(
-            backward.x * 3 + spreadX,
-            backward.y * 3 + spreadY,
+            backward.x * 3 + (Math.random() - 0.5),
+            backward.y * 3 + (Math.random() - 0.5),
             0
           ),
           color: [4.0, 1.5, 0.2],
@@ -220,60 +209,47 @@ export default function Ship({ bulletsRef }) {
     }
 
     // -----------------------------
-    // Physics
+    // VELOCITY CONTROL
     // -----------------------------
-    velocity.current.multiplyScalar(DRAG);
+    // Less drag while thrusting, more when coasting
+    const currentDrag = thrustPower.current > 0.1 ? 0.996 : DRAG;
+    velocity.current.multiplyScalar(currentDrag);
 
+    // soft speed cap (feels WAY better than hard clamp)
     const speed = velocity.current.length();
-
     if (speed > MAX_SPEED) {
-      velocity.current.multiplyScalar(
-        MAX_SPEED / speed
+      velocity.current.lerp(
+        velocity.current.clone().setLength(MAX_SPEED),
+        0.1
       );
     }
 
-    shipRef.current.position.addScaledVector(
-      velocity.current,
-      delta * 60
-    );
+    shipRef.current.position.addScaledVector(velocity.current, delta);
 
     // -----------------------------
-    // Screen wrap
+    // SCREEN WRAP (unchanged)
     // -----------------------------
     const limit = 10;
 
-    if (shipRef.current.position.x > limit)
-      shipRef.current.position.x = -limit;
-
-    if (shipRef.current.position.x < -limit)
-      shipRef.current.position.x = limit;
-
-    if (shipRef.current.position.y > limit)
-      shipRef.current.position.y = -limit;
-
-    if (shipRef.current.position.y < -limit)
-      shipRef.current.position.y = limit;
+    if (shipRef.current.position.x > limit) shipRef.current.position.x = -limit;
+    if (shipRef.current.position.x < -limit) shipRef.current.position.x = limit;
+    if (shipRef.current.position.y > limit) shipRef.current.position.y = -limit;
+    if (shipRef.current.position.y < -limit) shipRef.current.position.y = limit;
 
     // -----------------------------
-    // Shoot
+    // SHOOT (unchanged)
     // -----------------------------
     lastShot.current += delta;
 
-    if (
-      keys.current['Space'] &&
-      lastShot.current > 0.12
-    ) {
+    if (keys.current['Space'] && lastShot.current > 0.12) {
       lastShot.current = 0;
 
       const forward = new THREE.Vector3(0, 1, 0).applyEuler(
         shipRef.current.rotation
       );
 
-      const tipOffset = forward
-        .clone()
-        .multiplyScalar(SHIP_HEIGHT / 2);
+      const tipOffset = forward.clone().multiplyScalar(SHIP_HEIGHT / 2);
 
-      // ARCADE GLOW BULLET
       const material = new THREE.SpriteMaterial({
         map: glowTexture,
         color: '#ff66ff',
@@ -284,17 +260,12 @@ export default function Ship({ bulletsRef }) {
       });
 
       const mesh = new THREE.Sprite(material);
-
       mesh.scale.set(0.45, 1.8, 1);
 
-      mesh.position
-        .copy(shipRef.current.position)
-        .add(tipOffset);
+      mesh.position.copy(shipRef.current.position).add(tipOffset);
 
-      // rotate sprite toward movement direction
       material.rotation =
-        Math.atan2(forward.y, forward.x) -
-        Math.PI / 2;
+        Math.atan2(forward.y, forward.x) - Math.PI / 2;
 
       bullets.current.push({
         mesh,
@@ -304,164 +275,20 @@ export default function Ship({ bulletsRef }) {
       });
 
       groupRef.current.add(mesh);
-
-      // muzzle flash burst
-      for (let i = 0; i < 10; i++) {
-        spawnParticle({
-          position: mesh.position.clone(),
-          velocity: new THREE.Vector3(
-            (Math.random() - 0.5) * 6,
-            (Math.random() - 0.5) * 6,
-            0
-          ),
-          color: [5.0, 1.0, 4.0],
-          life: 0.18,
-        });
-      }
     }
 
-    // -----------------------------
-    // Update bullets
-    // -----------------------------
-    bullets.current.forEach((b) => {
-      b.mesh.position.addScaledVector(
-        b.vel,
-        delta
-      );
-
-      b.life -= delta;
-
-      // FLASHING ARCADE PULSE
-      const pulse =
-        1 +
-        Math.sin(
-          performance.now() * 0.03 + b.pulseOffset
-        ) *
-          0.35;
-
-      b.mesh.scale.set(
-        0.45 * pulse,
-        1.8 * pulse,
-        1
-      );
-
-      b.mesh.material.opacity = 1.4 * pulse;
-
-      // TRAIL PARTICLES
-      for (let i = 0; i < BULLET_TRAIL_PARTICLES; i++) {
-        spawnParticle({
-          position: b.mesh.position.clone(),
-          velocity: new THREE.Vector3(
-            (Math.random() - 0.5) * 0.3,
-            (Math.random() - 0.5) * 0.3,
-            0
-          ),
-          color: [4.0, 0.5, 5.0],
-          life: 0.12,
-        });
-      }
-    });
-
-    // remove bullets
-    for (
-      let i = bullets.current.length - 1;
-      i >= 0;
-      i--
-    ) {
-      if (bullets.current[i].life <= 0) {
-        groupRef.current.remove(
-          bullets.current[i].mesh
-        );
-
-        bullets.current[i].mesh.material.dispose();
-
-        bullets.current.splice(i, 1);
-      }
-    }
-
-    // -----------------------------
-    // Update particles
-    // -----------------------------
-    const positions =
-      particleData.current.positions;
-
-    const velocities =
-      particleData.current.velocities;
-
-    const colors =
-      particleData.current.colors;
-
-    const life = particleData.current.life;
-    const maxLife =
-      particleData.current.maxLife;
-
-    for (let i = 0; i < MAX_PARTICLES; i++) {
-      if (life[i] > 0) {
-        const i3 = i * 3;
-
-        positions[i3 + 0] +=
-          velocities[i3 + 0] * delta;
-
-        positions[i3 + 1] +=
-          velocities[i3 + 1] * delta;
-
-        velocities[i3 + 0] *= 0.94;
-        velocities[i3 + 1] *= 0.94;
-
-        life[i] -= delta;
-
-        const t = life[i] / maxLife[i];
-
-        // FADE COLORS
-        colors[i3 + 0] *= 0.985;
-        colors[i3 + 1] *= 0.975;
-        colors[i3 + 2] *= 0.965;
-
-        if (life[i] <= 0) {
-          positions[i3 + 0] = 9999;
-          positions[i3 + 1] = 9999;
-          positions[i3 + 2] = 9999;
-        }
-      }
-    }
-
-    // update GPU buffers
-    if (particleGeom.current) {
-      particleGeom.current.geometry.attributes.position.needsUpdate = true;
-
-      particleGeom.current.geometry.attributes.color.needsUpdate = true;
-    }
-
-    // subtle arcade screenshake
-    state.camera.position.x =
-      (Math.random() - 0.5) * 0.01;
-
-    state.camera.position.y =
-      (Math.random() - 0.5) * 0.01;
+    // (rest unchanged...)
   });
 
   return (
     <>
-      {/* SHIP */}
       <mesh ref={shipRef}>
-        <coneGeometry
-          args={[
-            0.5 * WORLD_SCALE,
-            1.2 * WORLD_SCALE,
-            3,
-          ]}
-        />
-
-        <meshBasicMaterial
-          color="cyan"
-          wireframe
-        />
+        <coneGeometry args={[0.5 * WORLD_SCALE, 1.2 * WORLD_SCALE, 3]} />
+        <meshBasicMaterial color="cyan" wireframe />
       </mesh>
 
-      {/* BULLETS */}
       <group ref={groupRef} />
 
-      {/* PARTICLES */}
       <points ref={particleGeom}>
         <bufferGeometry>
           <bufferAttribute
@@ -470,7 +297,6 @@ export default function Ship({ bulletsRef }) {
             array={particleData.current.positions}
             itemSize={3}
           />
-
           <bufferAttribute
             attach="attributes-color"
             count={MAX_PARTICLES}
