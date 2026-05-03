@@ -14,7 +14,6 @@ export default function Ship({ bulletsRef }) {
   const shipRef = useRef();
   const groupRef = useRef();
   const particleGeom = useRef();
-
   const keys = useRef({});
 
   // -----------------------------
@@ -29,12 +28,10 @@ export default function Ship({ bulletsRef }) {
   // -----------------------------
   const TURN_SPEED = 4.5;
   const TURN_SMOOTH = 8; // higher = snappier
-
   const THRUST = 16 * WORLD_SCALE;
   const THRUST_RAMP = 9; // how fast thrust builds
   const DRAG = 0.992;
   const MAX_SPEED = 16 * WORLD_SCALE;
-
   const SHIP_HEIGHT = 1.2 * WORLD_SCALE;
 
   // -----------------------------
@@ -99,7 +96,6 @@ export default function Ship({ bulletsRef }) {
       ) {
         e.preventDefault();
       }
-
       keys.current[e.code] = down;
     };
 
@@ -290,7 +286,6 @@ export default function Ship({ bulletsRef }) {
       }
     }
 
-
     // -----------------------------
     // Update bullets
     // -----------------------------
@@ -405,7 +400,6 @@ export default function Ship({ bulletsRef }) {
     // subtle arcade screenshake
     state.camera.position.x =
       (Math.random() - 0.5) * 0.01;
-
     state.camera.position.y =
       (Math.random() - 0.5) * 0.01;
   });
