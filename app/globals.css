@@ -112,3 +112,42 @@ body {
   background: radial-gradient(circle, transparent 60%, black 100%);
   pointer-events: none;
 }
+
+/* CRT flicker base */
+.crt-screen {
+  position: relative;
+  background: black;
+  overflow: hidden;
+}
+
+/* scanlines */
+.scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 255, 0, 0.03),
+    rgba(0, 255, 0, 0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+}
+
+/* glow text */
+.glow {
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.6);
+}
+
+/* subtle flicker */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 0.85; }
+  93% { opacity: 0.4; }
+  94% { opacity: 1; }
+}
+
+.crt-screen {
+  animation: flicker 2.5s infinite;
+}

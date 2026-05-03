@@ -33,70 +33,52 @@ export default function Login() {
     };
 
     return (
-        <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
+        <div className="flex flex-1 items-center justify-center bg-black font-mono text-green-400 relative overflow-hidden animate-[flicker_2.5s_infinite]">
+            <main className="relative w-full max-w-md p-8 border border-green-500/40 bg-black shadow-[0_0_20px_rgba(0,255,0,0.15)] overflow-hidden">
 
-            <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center py-18 px-16 bg-white dark:bg-black">
+                {/* scanline overlay */}
+                <div className="scanlines" />
 
-                {/* Card container */}
-                <div className="w-full max-w-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black p-8 flex flex-col items-center">
-
-                    {/* Top gold line */}
-                    <div className="w-full h-[2px] bg-gradient-to-r from-blue-600 via-blue-400 to-blue-600 mb-6" />
-
-                    {/* Title */}
-                    <h1 className="text-3xl tracking-wide mb-6 text-black dark:text-white flex items-center gap-2">
-                        <span className="font-[var(--font-cinzel)]">Login</span>
+                {/* terminal header */}
+                <div className="mb-6 text-center">
+                    <h1 className="text-xl tracking-[0.3em] uppercase text-green-300 drop-shadow-[0_0_6px_rgba(0,255,0,0.6)]">
+                        SYSTEM LOGIN
                     </h1>
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
-
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            className="w-full px-4 py-2 bg-transparent border border-zinc-300 dark:border-zinc-700 text-black dark:text-white focus:outline-none focus:border-blue-500"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required />
-
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className="w-full px-4 py-2 bg-transparent border border-zinc-300 dark:border-zinc-700 text-black dark:text-white focus:outline-none focus:border-blue-500"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required />
-
-                        <button
-                            type="submit"
-                            className="mt-4 w-full py-2 bg-black text-white border border-zinc-700 hover:bg-zinc-900 transition">
-                            Sign In
-                        </button>
-
-                        {message && (
-                            <p className="mt-4 text-sm text-red-600">{message}</p>
-                        )}
-                    </form>
-
-                    {/* Divider suits */}
-                    <div className="flex items-center gap-3 text-lg my-6">
-                        <span>☄️</span>
-                        <span>☄️</span>
-                        <span>☄️</span>
-                        <span>☄️</span>
-                    </div>
-
-                    {/* Bottom text */}
-                    <p className="text-sm text-zinc-500">
-                        No account?{" "}
-                        <a href="/signup" className="text-white hover:underline">
-                            Register
-                        </a>
+                    <p className="text-[10px] tracking-[0.3em] text-green-600 mt-2">
+                        AUTHORIZATION REQUIRED
                     </p>
+                </div>
 
-                    {/* Bottom blue line */}
-                    <div className="w-full h-[2px] bg-gradient-to-r from-blue-900 via-blue-600 to-blue-900 mt-6" />
+                {/* form */}
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4 relative z-10">
 
+                    <input
+                        type="email"
+                        placeholder="EMAIL>"
+                        className="w-full bg-black border border-green-700 px-3 py-2 text-green-300 placeholder-green-800 focus:outline-none focus:border-green-400"
+                    />
+
+                    <input
+                        type="password"
+                        placeholder="PASSWORD>"
+                        className="w-full bg-black border border-green-700 px-3 py-2 text-green-300 placeholder-green-800 focus:outline-none focus:border-green-400"
+                    />
+
+                    <button className="w-full mt-2 border border-green-500 text-green-300 py-2 uppercase tracking-widest hover:bg-green-900/20 transition">
+                        ENTER
+                    </button>
+
+                    {message && (
+                        <p className="text-xs text-red-500 mt-2">
+                            {message}
+                        </p>
+                    )}
+                </form>
+
+                {/* footer terminal noise */}
+                <div className="mt-6 text-[10px] tracking-[0.3em] text-green-700">
+                    ▓▒░ CONNECTION STABLE ░▒▓
                 </div>
 
             </main>
