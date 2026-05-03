@@ -32,6 +32,10 @@ body {
   background: #000;
 }
 
+.font-audiowide {
+  font-family: var(--font-audiowide);
+}
+
 /* ===== Neon Glow ===== */
 .neon-cyan {
   border: 1px solid #00eaff;

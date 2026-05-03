@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Audiowide } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "../lib/authContext";
 import Header from '../components/Header';
@@ -15,6 +15,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const audiowide = Audiowide({
+  variable: "--font-audiowide",
+  subsets: ["latin"],
+    weight: "400",
+});
+
 export const metadata = {
   title: "Asteroids",
   description: "A game of Asteroids built with React Next",
@@ -24,7 +30,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+      className={`${geistSans.variable} ${geistMono.variable} ${audiowide.variable} h-full antialiased`}>
 
       <body className="min-h-full flex flex-col">
 
