@@ -1,4 +1,4 @@
-// components/ShipWithBullets.js
+// components/Ship.js
 'use client';
 
 import { useRef, useEffect, useMemo } from 'react';
@@ -237,7 +237,7 @@ export default function Ship({ bulletsRef }) {
     if (shipRef.current.position.y < -limit) shipRef.current.position.y = limit;
 
     // -----------------------------
-    // SHOOT (unchanged)
+    // SHOOT
     // -----------------------------
     lastShot.current += delta;
 
@@ -275,9 +275,139 @@ export default function Ship({ bulletsRef }) {
       });
 
       groupRef.current.add(mesh);
+      // muzzle flash burst
+      for (let i = 0; i < 10; i++) {
+        spawnParticle({
+          position: mesh.position.clone(),
+          velocity: new THREE.Vector3(
+            (Math.random() - 0.5) * 6,
+            (Math.random() - 0.5) * 6,
+            0
+          ),
+          color: [5.0, 1.0, 4.0],
+          life: 0.18,
+        });
+      }
     }
 
-    // (rest unchanged...)
+
+    // -----------------------------
+    // Update bullets
+    // -----------------------------
+    bullets.current.forEach((b) => {
+      b.mesh.position.addScaledVector(
+        b.vel,
+        delta
+      );
+
+      b.life -= delta;
+
+      // FLASHING ARCADE PULSE
+      const pulse =
+        1 +
+        Math.sin(
+          performance.now() * 0.03 + b.pulseOffset
+        ) *
+        0.35;
+
+      b.mesh.scale.set(
+        0.45 * pulse,
+        1.8 * pulse,
+        1
+      );
+
+      b.mesh.material.opacity = 1.4 * pulse;
+
+      // TRAIL PARTICLES
+      for (let i = 0; i < BULLET_TRAIL_PARTICLES; i++) {
+        spawnParticle({
+          position: b.mesh.position.clone(),
+          velocity: new THREE.Vector3(
+            (Math.random() - 0.5) * 0.3,
+            (Math.random() - 0.5) * 0.3,
+            0
+          ),
+          color: [4.0, 0.5, 5.0],
+          life: 0.12,
+        });
+      }
+    });
+
+    // remove bullets
+    for (
+      let i = bullets.current.length - 1;
+      i >= 0;
+      i--
+    ) {
+      if (bullets.current[i].life <= 0) {
+        groupRef.current.remove(
+          bullets.current[i].mesh
+        );
+
+        bullets.current[i].mesh.material.dispose();
+
+        bullets.current.splice(i, 1);
+      }
+    }
+
+    // -----------------------------
+    // Update particles
+    // -----------------------------
+    const positions =
+      particleData.current.positions;
+
+    const velocities =
+      particleData.current.velocities;
+
+    const colors =
+      particleData.current.colors;
+
+    const life = particleData.current.life;
+    const maxLife =
+      particleData.current.maxLife;
+
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+      if (life[i] > 0) {
+        const i3 = i * 3;
+
+        positions[i3 + 0] +=
+          velocities[i3 + 0] * delta;
+
+        positions[i3 + 1] +=
+          velocities[i3 + 1] * delta;
+
+        velocities[i3 + 0] *= 0.94;
+        velocities[i3 + 1] *= 0.94;
+
+        life[i] -= delta;
+
+        const t = life[i] / maxLife[i];
+
+        // FADE COLORS
+        colors[i3 + 0] *= 0.985;
+        colors[i3 + 1] *= 0.975;
+        colors[i3 + 2] *= 0.965;
+
+        if (life[i] <= 0) {
+          positions[i3 + 0] = 9999;
+          positions[i3 + 1] = 9999;
+          positions[i3 + 2] = 9999;
+        }
+      }
+    }
+
+    // update GPU buffers
+    if (particleGeom.current) {
+      particleGeom.current.geometry.attributes.position.needsUpdate = true;
+      particleGeom.current.geometry.attributes.color.needsUpdate = true;
+    }
+
+    // subtle arcade screenshake
+    state.camera.position.x =
+      (Math.random() - 0.5) * 0.01;
+
+    state.camera.position.y =
+      (Math.random() - 0.5) * 0.01;
   });
 
   return (
